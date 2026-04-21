@@ -23,20 +23,27 @@ function Navbar() {
 
   function navClass(path) {
     const active = location.pathname === path || location.pathname.startsWith(path + "/")
-    return `hover:text-yellow-400 transition ${active ? "text-yellow-400 font-semibold" : ""}`
+    return `transition-colors font-medium ${
+      active ? "text-yellow-400" : "text-white hover:text-yellow-400"
+    }`
   }
 
+  const homeActive = location.pathname === "/" || location.pathname.startsWith("/browse/")
+
   return (
-    <nav className="bg-gray-900 px-8 py-4 flex justify-between items-center sticky top-0 z-50 border-b border-gray-800">
+    <nav className="bg-gray-950/80 backdrop-blur-md px-8 py-4 flex justify-between items-center sticky top-0 z-50 border-b border-white/10">
       <h1
         onClick={() => navigate("/")}
-        className="text-2xl font-bold text-yellow-400 cursor-pointer select-none"
+        className="text-2xl font-black text-yellow-400 cursor-pointer select-none tracking-tight"
       >
         EntertainHub
       </h1>
 
-      <div className="flex gap-6 text-gray-300">
-        <button onClick={() => navigate("/")} className={navClass("/") + " " + (location.pathname === "/" ? "text-yellow-400 font-semibold" : "")}>
+      <div className="flex gap-8">
+        <button
+          onClick={() => navigate("/")}
+          className={`transition-colors font-medium ${homeActive ? "text-yellow-400" : "text-white hover:text-yellow-400"}`}
+        >
           Movies
         </button>
         <button onClick={() => navigate("/music")} className={navClass("/music")}>
@@ -58,7 +65,7 @@ function Navbar() {
             <span className="text-gray-400 text-sm max-w-40 truncate">{user.email}</span>
             <button
               onClick={() => signOut(auth)}
-              className="px-4 py-2 text-gray-300 hover:text-white transition"
+              className="px-4 py-2 text-white hover:text-yellow-400 transition-colors font-medium"
             >
               Logout
             </button>
@@ -67,13 +74,13 @@ function Navbar() {
           <>
             <button
               onClick={() => navigate("/auth")}
-              className="px-4 py-2 text-gray-300 hover:text-white transition"
+              className="px-4 py-2 text-white hover:text-yellow-400 transition-colors font-medium"
             >
               Login
             </button>
             <button
               onClick={() => navigate("/auth")}
-              className="px-4 py-2 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition"
+              className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-colors"
             >
               Sign Up
             </button>

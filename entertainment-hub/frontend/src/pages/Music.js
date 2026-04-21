@@ -6,18 +6,22 @@ function AlbumCard({ album, rank, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="bg-gray-800 rounded-xl overflow-hidden hover:scale-105 transition-transform cursor-pointer"
+      className="relative rounded-xl overflow-hidden cursor-pointer group h-64 bg-gray-800"
     >
       {album.image ? (
-        <img src={album.image} alt={album.title} className="w-full h-48 object-cover" />
+        <img
+          src={album.image}
+          alt={album.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
       ) : (
-        <div className="bg-gray-700 h-48 flex items-center justify-center text-5xl">🎵</div>
+        <div className="w-full h-full bg-gray-700 flex items-center justify-center text-5xl">🎵</div>
       )}
-      <div className="p-3">
-        {rank && <span className="text-xs text-yellow-400 font-bold">#{rank}</span>}
-        <h3 className="font-semibold text-white truncate mt-0.5">{album.title}</h3>
-        <p className="text-gray-400 text-sm truncate">{album.artist}</p>
-        <p className="text-gray-500 text-xs mt-1">{album.genre}</p>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+        <div className="absolute top-3 right-3 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-base">+</div>
+        {rank && <span className="text-yellow-400 text-xs font-bold mb-0.5">#{rank}</span>}
+        <h3 className="font-bold text-white text-sm leading-tight">{album.title}</h3>
+        <p className="text-gray-300 text-xs mt-0.5">{album.artist}</p>
       </div>
     </div>
   )
@@ -73,7 +77,9 @@ export default function Music() {
           {searching ? "🔍 Search Results" : "🔥 Top Albums on iTunes"}
         </h2>
         {loading ? (
-          <p className="text-gray-400">Loading...</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {Array(10).fill(0).map((_, i) => <div key={i} className="rounded-xl h-64 skeleton" />)}
+          </div>
         ) : displayAlbums.length === 0 ? (
           <p className="text-gray-400">
             {searching ? "No results found." : "Could not load albums."}

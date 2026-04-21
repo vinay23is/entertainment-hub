@@ -7,6 +7,26 @@ import { addToWatchlist, removeFromWatchlist, isInWatchlist, IMG_URL } from "../
 const API_KEY = "0841d635c10f90f92d5823d412c990b3"
 const BG_URL = "https://image.tmdb.org/t/p/original"
 
+function SkeletonDetail() {
+  return (
+    <div className="min-h-screen">
+      <div className="relative h-screen bg-gray-900 animate-pulse flex items-end px-12 pb-16">
+        <div className="flex gap-8 items-end w-full max-w-4xl">
+          <div className="w-44 h-64 bg-gray-700 rounded-xl flex-shrink-0 hidden md:block" style={{ marginBottom: "-2rem" }} />
+          <div className="flex-1 space-y-4 pb-8">
+            <div className="h-3 w-28 bg-gray-700 rounded" />
+            <div className="h-14 w-96 bg-gray-700 rounded" />
+            <div className="h-3 w-40 bg-gray-700 rounded" />
+            <div className="h-3 w-full bg-gray-700 rounded" />
+            <div className="h-3 w-3/4 bg-gray-700 rounded" />
+            <div className="h-12 w-40 bg-gray-700 rounded-lg" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Detail() {
   const { type, id } = useParams()
   const navigate = useNavigate()
@@ -18,6 +38,8 @@ export default function Detail() {
   useEffect(() => {
     if (!type || !id) return
     window.scrollTo(0, 0)
+    setItem(null)
+    setCast([])
 
     fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}`)
       .then(r => r.json())
@@ -59,13 +81,7 @@ export default function Detail() {
     }
   }
 
-  if (!item) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-400 text-xl">Loading...</p>
-      </div>
-    )
-  }
+  if (!item) return <SkeletonDetail />
 
   if (item.success === false) {
     return (
@@ -80,61 +96,68 @@ export default function Detail() {
 
   const title = item.title || item.name
   const year = (item.release_date || item.first_air_date)?.split("-")[0]
-  const genres = item.genres?.map(g => g.name).join(", ")
+  const genres = item.genres?.map(g => g.name).join(" · ")
 
   return (
-    <div className="min-h-screen">
-      {/* Backdrop */}
-      <div className="relative h-72 overflow-hidden">
+    <div className="min-h-screen animate-fade-in">
+      {/* ── Full-viewport backdrop with overlaid info ── */}
+      <div className="relative min-h-screen flex items-end">
         {item.backdrop_path ? (
           <img
             src={BG_URL + item.backdrop_path}
             alt={title}
-            className="w-full h-full object-cover opacity-50"
+            className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gray-800" />
+          <div className="absolute inset-0 bg-gray-800" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent" />
-      </div>
 
-      {/* Main Content */}
-      <div className="px-8 py-6">
-        <button onClick={() => navigate(-1)} className="text-yellow-400 hover:text-yellow-300 mb-6 block text-lg">
+        {/* Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-gray-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/20 to-transparent" />
+
+        {/* Back button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-8 left-8 z-10 flex items-center gap-2 text-white hover:text-yellow-400 transition-colors font-medium text-sm bg-black/30 backdrop-blur-sm px-4 py-2 rounded-full"
+        >
           ← Back
         </button>
 
-        <div className="flex gap-8">
-          {item.poster_path ? (
+        {/* Info block at bottom of backdrop */}
+        <div className="relative z-10 w-full px-8 md:px-12 pb-12 flex gap-8 items-end">
+          {/* Poster — overlaps into content area */}
+          {item.poster_path && (
             <img
               src={IMG_URL + item.poster_path}
               alt={title}
-              className="w-48 h-72 rounded-xl shadow-2xl object-cover flex-shrink-0"
+              className="w-44 rounded-xl shadow-2xl object-cover flex-shrink-0 hidden md:block"
+              style={{ marginBottom: "-3rem" }}
             />
-          ) : (
-            <div className="w-48 h-72 bg-gray-800 rounded-xl flex items-center justify-center text-5xl flex-shrink-0">
-              🎬
-            </div>
           )}
 
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-white">{title}</h1>
-            <p className="text-gray-400 mt-2 text-lg">{year} · {genres}</p>
-
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-yellow-400 text-3xl">★</span>
-              <span className="text-white text-3xl font-bold">{item.vote_average?.toFixed(1)}</span>
-              <span className="text-gray-400 text-lg">/10</span>
-              <span className="text-gray-500 text-sm ml-2">({item.vote_count?.toLocaleString()} votes)</span>
+          <div className="flex-1 pb-2">
+            {genres && (
+              <p className="text-gray-400 text-sm uppercase tracking-widest mb-3">{genres}</p>
+            )}
+            <h1 className="text-5xl md:text-7xl font-black text-white leading-none mb-4 drop-shadow-lg">
+              {title}
+            </h1>
+            <div className="flex items-center gap-4 mb-5 flex-wrap">
+              <span className="text-yellow-400 font-bold text-xl">
+                ★ {item.vote_average?.toFixed(1)}
+              </span>
+              {year && <span className="text-gray-300">{year}</span>}
+              <span className="text-gray-500 text-sm">
+                {item.vote_count?.toLocaleString()} votes
+              </span>
             </div>
-
-            <p className="text-gray-300 mt-4 text-lg leading-relaxed max-w-2xl">
+            <p className="text-gray-300 leading-relaxed max-w-2xl mb-6 line-clamp-3">
               {item.overview || "No overview available."}
             </p>
-
             <button
               onClick={toggleWatchlist}
-              className={`mt-6 px-6 py-3 font-bold rounded-lg transition ${
+              className={`px-7 py-3 font-bold rounded-lg transition-colors shadow-lg ${
                 inWatchlist
                   ? "bg-gray-700 text-white hover:bg-red-900"
                   : "bg-yellow-400 text-black hover:bg-yellow-300"
@@ -144,32 +167,35 @@ export default function Detail() {
             </button>
           </div>
         </div>
+      </div>
 
-        {cast.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">🎭 Cast</h2>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
-              {cast.map(c => (
-                <div key={c.id} className="text-center">
+      {/* ── Cast ── */}
+      {cast.length > 0 && (
+        <div className="px-8 md:px-12 pt-16 pb-16 animate-fade-in">
+          <h2 className="text-2xl font-bold mb-8">Cast</h2>
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-5">
+            {cast.map(c => (
+              <div key={c.id} className="text-center group">
+                <div className="overflow-hidden rounded-xl mb-2">
                   {c.profile_path ? (
                     <img
                       src={IMG_URL + c.profile_path}
                       alt={c.name}
-                      className="w-full h-32 rounded-xl object-cover"
+                      className="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="bg-gray-700 h-32 rounded-xl flex items-center justify-center text-3xl">
+                    <div className="w-full aspect-[2/3] bg-gray-700 flex items-center justify-center text-3xl">
                       👤
                     </div>
                   )}
-                  <p className="text-white text-sm mt-2 truncate">{c.name}</p>
-                  <p className="text-gray-400 text-xs truncate">{c.character}</p>
                 </div>
-              ))}
-            </div>
+                <p className="text-white text-xs font-semibold truncate">{c.name}</p>
+                <p className="text-gray-400 text-xs truncate">{c.character}</p>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
