@@ -12,8 +12,8 @@ Most people bounce between four different apps to decide what to watch, listen t
 - **Frontend:** React 19, React Router, Tailwind CSS
 - **Backend/Database:** Firebase Authentication (email/password) + Firestore (per-user watchlist storage)
 - **External APIs:** TMDb API (movies/TV — trending, top rated, now playing, upcoming, search, detail data), iTunes Search/RSS API (top albums, album search, track previews — no key required)
-- **Data:** a curated static dataset (`src/data/games.js`) of 15 games with Steam CDN artwork, since there's no free games API with the same reliability as TMDb
-- **Infra/Deployment:** Vercel, with a root `vercel.json` pointing the build at the `frontend/` subfolder (`cd frontend && npm install && npm run build`) and an SPA rewrite rule so client-side routes resolve correctly on refresh
+- **Data:** a curated static dataset (`entertainment-hub/frontend/src/data/games.js`) of 15 games with Steam CDN artwork, since there's no free games API with the same reliability as TMDb
+- **Infra/Deployment:** Vercel, with `entertainment-hub/vercel.json` pointing the build at the `entertainment-hub/frontend/` subfolder (`cd frontend && npm install && npm run build`) and an SPA rewrite rule so client-side routes resolve correctly on refresh
 
 ## Architecture
 
@@ -33,11 +33,11 @@ Most people bounce between four different apps to decide what to watch, listen t
 ## Interesting Engineering Decisions
 - Three completely different data sources (TMDb JSON, iTunes RSS/JSON, and a static dataset) are normalized into one common shape in `api.js` so every page component (`Detail.js`, `MusicDetail.js`, `GameDetail.js`) can render items the same way regardless of where the data came from.
 - The Firestore watchlist schema (`watchlists/{userId}/items/{itemId}`) is deliberately domain-agnostic — a movie ID and a game ID land in the same collection shape, which is what makes a single `Watchlist.js` page work across all three content types instead of needing three separate saved-items views.
-- Deployment is configured for a monorepo-style layout: the root `vercel.json` builds from the `frontend/` subdirectory rather than the repo root, since the frontend isn't at the top level of the project.
+- Deployment is configured for a monorepo-style layout: `entertainment-hub/vercel.json` builds from the `frontend/` subdirectory rather than the repo root, since the actual project lives one folder down from the repo root.
 
 ## Running Locally
 ```bash
-cd frontend
+cd entertainment-hub/frontend
 npm install
 npm start
 ```
